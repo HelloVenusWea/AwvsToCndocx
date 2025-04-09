@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>报告列表 - Acunetix 扫描管理</title>
+    <style>
+        /* 继承index.html的样式 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9e9f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .result-box {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .report-list {
+            margin-top: 20px;
+            width: 100%;
+        }
+        .report-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .download-link {
+            color: #3498db;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        .download-link:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div style="position: absolute; top: 20px; right: 20px;">
+        <button type="button" onclick="window.location.href='/logout'" 
+                style="background-color: #e74c3c; padding: 8px 15px;">
+            登出
+        </button>
+    </div>
+
+    <h1>报告列表</h1>
+    <div class="result-box">
+        <div class="report-list">
+            {% for report in reports %}
+                <div class="report-item">
+                    <span>{{ report|replace('CNResult/', '') }}</span>
+                    <a href="/download_report?filename={{ report }}" class="download-link">下载</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 20px;">
+        <button onclick="window.location.href='/'" style="padding: 10px 20px;">返回首页</button>
+    </div>
+</body>
+</html>

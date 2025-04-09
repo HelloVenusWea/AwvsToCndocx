@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Acunetix 扫描管理</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9e9f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 40px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;  /* 增加最大宽度 */
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        input[type="submit"],
+        input[type="button"],
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 1em;
+        }
+        input[type="submit"]:hover,
+        input[type="button"]:hover,
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result-box {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+            margin-top: 20px;
+            /* 添加以下样式来确保水平居中 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 1.8em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f1f1;
+            font-weight: 600;
+        }
+        #url-input-section {
+            display: none;
+            margin-top: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+        }
+        /* 新增的样式代码 */
+        .report-list {
+            margin-top: 20px;
+            width: 100%;
+        }
+        .report-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .download-link {
+            color: #3498db;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        .download-link:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+    <script>
+        function showUrlInput() {
+            document.getElementById('url-input-section').style.display = 'block';
+        }
+        // 确保没有其他干扰的JavaScript代码
+    </script>
+</head>
+<!-- 在body标签开始后添加登出按钮容器 -->
+<body>
+    <!-- 添加登出按钮容器 -->
+    <div style="position: absolute; top: 20px; right: 20px;">
+        <button type="button" onclick="window.location.href='/logout'" 
+                style="background-color: #e74c3c; padding: 8px 15px;">
+            登出
+        </button>
+    </div>
+
+    <h1>Acunetix 扫描管理</h1>
+    <form method="post" action="{{ url_for('index') }}">
+        <!-- 从原有按钮组中移除登出按钮 -->
+        <div class="button-group">
+            <button type="button" onclick="showUrlInput()">添加任务</button>            
+            <!-- 修改后 -->
+            <button type="submit" name="action" value="check_status">查看扫描状态</button>
+            <button type="submit" name="action" value="export_download">导出报告</button>
+            <button type="submit" name="action" value="delete_completed">删除扫描</button>
+            <button type="button" onclick="window.location.href='/report_management'">报告列表</button>
+        </div>
+        
+         <!-- 修改后 -->
+        <!-- 删除报告列表部分，这部分将移动到report_management.html -->
+        <div id="url-input-section">
+            <textarea name="urls" rows="5" cols="50" placeholder="请粘贴要扫描的地址，每行一个"></textarea>
+            <button type="submit" name="action" value="confirm_start_scan">确认开始扫描</button>
+        </div>
+    </form>
+    {% if result %}
+        <div class="result-box">
+            <h2>操作结果</h2>
+            {% if result is string %}
+                <!-- 使用 safe 过滤器显示 HTML 内容 -->
+                <p>{{ result|safe }}</p>
+            {% else %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Target</th>
+                            <th>Target Description</th>
+                            <!-- 删除 Scan Profile 和 Schedule 表头 -->
+                            <th>Vulnerabilities</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for scan in result %}
+                            <tr>
+                                <td>{{ scan['Target'] }}</td>
+                                <td>{{ scan['Target Description'] }}</td>
+                                <!-- 删除 Scan Profile 和 Schedule 表数据 -->
+                                <td>
+                                    严重: {{ scan['Vulnerabilities'].get('critical', 0) }}
+                                    高: {{ scan['Vulnerabilities'].get('high', 0) }}
+                                    中: {{ scan['Vulnerabilities'].get('medium', 0) }}
+                                    低: {{ scan['Vulnerabilities'].get('low', 0) }}
+                                    信息: {{ scan['Vulnerabilities'].get('info', 0) }}
+                                </td>
+                                <td>{{ scan['Status'] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    {% endif %}
+</body>
+</html>
