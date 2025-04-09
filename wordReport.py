@@ -125,7 +125,7 @@ class Report:
 
         data_dic = {
             '项目名称': '',
-            '测试单位': '启明星辰',
+            '测试单位': 'XXXX',
             '大图标': InlineImage(self.doc, './img/logo.png', height=Mm(20)),
             '小图标': InlineImage(self.doc, './img/logo.png', height=Mm(7.3)),
             '密级': '商业保密',
