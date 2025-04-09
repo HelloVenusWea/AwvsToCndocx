@@ -1,0 +1,2 @@
+# AwvsToCndocx
+python重写AcunetixWeb Vulnerability Scanner管理界面，增加批量添加任务，报告中文翻译并自动生成word
